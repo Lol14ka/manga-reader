@@ -1,34 +1,40 @@
+import { Asset, ImagePicker } from 'expo-image-multiple-picker';
 import _ from 'lodash';
-import { memo, useCallback, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { memo, useCallback, useState } from 'react';
+import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import GridView from 'react-native-draggable-gridview';
+import uuid from 'react-native-uuid';
+import AntIcon from 'react-native-vector-icons/AntDesign';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 
-/**
- * Container
- */
-export const Chapter = memo(() => {
-  const { top, bottom } = { top: 20, bottom: 0 };
+interface ChapterProps {
+  onPublish: (title: string, images: Asset[]) => void;
+}
+
+export const Chapter = (props: ChapterProps) => {
+  const [title, setTitle] = useState<string>();
+  const [images, setImages] = useState<Asset[]>();
+  const [openPicker, setOpenPicker] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [data, setData] = useState<Data[]>(
-    Array.from(new Array(14)).map((v, i) => newData(i))
-  );
-
-  const onPressEdit = useCallback(() => {
-    setEditing(!editing);
-  }, [editing]);
-
-  const locked = useCallback((item) => item == "+", []);
 
   const renderLockedItem = useCallback(
-    () => <LockedItem editing={editing} onPress={onPressAdd} />,
-    [editing, data]
+    () => (
+      <LockedItem
+        editing={editing}
+        onPress={() => {
+          if (!editing) setOpenPicker(true);
+          else setEditing(false);
+        }}
+      />
+    ),
+    [editing, images]
   );
 
   const renderItem = useCallback(
-    (item) => (
-      <Item item={item} editing={editing} onPressDelete={onPressDelete} />
+    (asset) => (
+      <Photo asset={asset} editing={editing} onPressDelete={onPressDelete} />
     ),
-    [editing, data]
+    [editing, images]
   );
 
   const onBeginDragging = useCallback(
@@ -36,78 +42,98 @@ export const Chapter = memo(() => {
     [editing]
   );
 
-  const onPressCell = useCallback(
-    (item) => !editing && alert(item.color),
-    [editing]
-  );
-
-  const onPressAdd = useCallback(
-    () => !editing && setData([newData(data.length + 1), ...data]),
-    [editing, data]
-  );
-
   const onReleaseCell = useCallback(
-    (items: any[]) => {
-      const data1 = items.slice(1);
-      if (!_.isEqual(data, data1)) setData(data1);
+    (assets: Asset[]) => {
+      const images_one = assets.slice(1);
+      if (!_.isEqual(images, images_one)) setImages(images_one);
     },
-    [data]
+    [images]
   );
 
   const onPressDelete = useCallback(
-    (item: Data) => setData(data.filter((v) => v.id != item.id)),
-    [data]
+    (asset: Asset) => {
+      const newImages = (images || []).filter((v) => v.id != asset.id);
+      setImages(newImages);
+      if (newImages.length == 0) setEditing(false);
+    },
+    [images]
   );
 
-  return (
-    <View style={{ flex: 1 }}>
-      <GridView
-        data={["+", ...data]}
-        keyExtractor={(item) => (item == "+" ? item : item.id)}
-        renderItem={renderItem}
-        renderLockedItem={renderLockedItem}
-        locked={locked}
-        onBeginDragging={onBeginDragging}
-        onPressCell={onPressCell}
-        onReleaseCell={onReleaseCell}
-        numColumns={3}
-        delayLongPress={editing ? 50 : 500}
-        containerMargin={{ top: 60 + top, bottom, left: 2, right: 2 }}
+  if (openPicker) {
+    return (
+      <ImagePicker
+        onSave={(assets) => {
+          setImages([
+            ...(images || []),
+            ...assets.map((v, i) => ({ ...v, id: v.id + uuid.v4() })),
+          ]);
+          setOpenPicker(false);
+        }}
+        multiple
+        onCancel={() => setOpenPicker(false)}
       />
-      <Header top={top} editing={editing} onPress={onPressEdit} />
-    </View>
-  );
-});
+    );
+  }
 
-/**
- * Data
- */
-const colors = ["red", "orange", "green", "cyan", "blue", "purple", "pink"];
-
-interface Data {
-  id: string;
-  color?: string;
-}
-
-const newData = (i: number): Data => ({
-  id: uuid(),
-  color: colors[i % colors.length],
-});
-
-/**
- * Item
- */
-interface ItemProps {
-  item: Data;
-  editing: boolean;
-  onPressDelete: (item: Data) => void;
-}
-
-const Item = memo(({ item, editing, onPressDelete }: ItemProps) => {
   return (
-    <View style={[styles.item, { backgroundColor: item.color || "gray" }]}>
-      <Text style={{ color: "#fff", fontSize: 18 }}>{item.color}</Text>
-      {editing && <DeleteButton onPress={() => onPressDelete(item)} />}
+    <>
+      <View
+        style={{
+          padding: 20,
+          paddingTop: 40,
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexDirection: "row",
+          backgroundColor: "#eeeee4",
+        }}
+      >
+        <TextInput
+          style={{ fontSize: 16, maxWidth: "70%", color: "black" }}
+          onChangeText={setTitle}
+          value={title || ""}
+          placeholder="Nombre del capitulo"
+          placeholderTextColor="rgba(0,0,0,0.5)"
+        />
+        <TouchableOpacity
+          style={{ opacity: !!title && images && images.length > 0 ? 1 : 0.1 }}
+          disabled={!(!!title && images && images.length > 0)}
+          onPress={() => props.onPublish(title || "", images || [])}
+        >
+          <Text style={{ color: "black" }}>PUBLICAR</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={{ flex: 1 }}>
+        <GridView
+          data={["+", ...(images || [])]}
+          keyExtractor={(item) => (item == "+" ? item : item.id)}
+          renderItem={renderItem}
+          renderLockedItem={renderLockedItem}
+          locked={(item) => item == "+"}
+          onBeginDragging={onBeginDragging}
+          onPressCell={() => setEditing(true)}
+          onReleaseCell={onReleaseCell}
+          numColumns={3}
+          delayLongPress={editing ? 50 : 500}
+        />
+      </View>
+    </>
+  );
+};
+
+interface PhotoProps {
+  asset: Asset;
+  editing: boolean;
+  onPressDelete: (asset: Asset) => void;
+}
+
+const Photo = memo(({ asset, editing, onPressDelete }: PhotoProps) => {
+  return (
+    <View style={styles.item}>
+      <Image
+        source={{ uri: asset.uri }}
+        style={{ width: 100, height: 100, resizeMode: "cover" }}
+      />
+      {editing && <DeleteButton onPress={() => onPressDelete(asset)} />}
     </View>
   );
 });
@@ -120,9 +146,6 @@ const DeleteButton = memo(({ onPress }: { onPress: () => void }) => (
   </TouchableOpacity>
 ));
 
-/**
- * LockedItem
- */
 interface LockedItemProps {
   editing: boolean;
   onPress: () => void;
@@ -134,55 +157,13 @@ const LockedItem = memo(({ editing, onPress }: LockedItemProps) => (
     activeOpacity={editing ? 1 : 0.5}
     onPress={onPress}
   >
-    <View style={[styles.item, { opacity: editing ? 0.25 : 1 }]}>
-      <Text style={{ fontSize: 48 }}>+</Text>
+    <View style={styles.item}>
+      {!editing && <MaterialIcon name="add-a-photo" color="black" size={32} />}
+      {editing && <AntIcon name="checkcircle" color="black" size={32} />}
     </View>
   </TouchableOpacity>
 ));
 
-/**
- * Header
- */
-interface HeaderProps {
-  top: number;
-  editing: boolean;
-  onPress: () => void;
-}
-
-const Header = memo(({ top, editing, onPress }: HeaderProps) => (
-  <View style={[styles.header, { height: 60 + top }]}>
-    <View style={styles.headerContainer}>
-      <Text style={styles.headerTitle}>GRID</Text>
-      <TouchableOpacity onPress={onPress}>
-        <Text style={styles.headerItem}>{editing ? "DONE" : "EDIT"}</Text>
-      </TouchableOpacity>
-    </View>
-  </View>
-));
-
-/**
- * UUID
- */
-const uuid = (): string => {
-  // https://github.com/GoogleChrome/chrome-platform-analytics/blob/master/src/internal/identifier.js
-  // const FORMAT: string = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
-  let chars = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".split("");
-  for (let i = 0, len = chars.length; i < len; i++) {
-    switch (chars[i]) {
-      case "x":
-        chars[i] = Math.floor(Math.random() * 16).toString(16);
-        break;
-      case "y":
-        chars[i] = (Math.floor(Math.random() * 4) + 8).toString(16);
-        break;
-    }
-  }
-  return chars.join("");
-};
-
-/**
- * Style
- */
 const styles = StyleSheet.create({
   item: {
     flex: 1,

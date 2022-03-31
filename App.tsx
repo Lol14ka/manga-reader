@@ -1,13 +1,92 @@
-import { Chapter } from './components/Chapter';
+import React from 'react';
+
+import { List } from './components/List';
 
 const App = () => {
-  return <Chapter />;
+  return (
+    <List
+      onSearch={(e) => console.log(e)}
+      data={[
+        {
+          id: "3ac68afc-c605-48d3-a4f8-fbd91aa97",
+          title: "Initial D",
+          description: "Epic 90's JDM manga",
+          image_url: "https://imgur.com/YnVIvcc.jpg",
+        },
+        {
+          id: "3ac68ac-c6-48d3f8-fbd91aa97",
+          title: "Initial D",
+          description: "Epic 90's JDM manga",
+          image_url: "https://imgur.com/YnVIvcc.jpg",
+        },
+        {
+          id: "3ac68afc-c605-48d3-a4f81aa97",
+          title: "Initial D",
+          description: "Epic 90's JDM manga",
+          image_url: "https://imgur.com/YnVIvcc.jpg",
+        },
+        {
+          id: "3ac68afc-c605-48d3-a4f8d91aa97",
+          title: "Initial D",
+          description: "Epic 90's JDM manga",
+          image_url: "https://imgur.com/YnVIvcc.jpg",
+        },
+        {
+          id: "3ac68afc-c648d3-a4f8-fbd91aa97",
+          title: "Initial D",
+          description: "Epic 90's JDM manga",
+          image_url: "https://imgur.com/YnVIvcc.jpg",
+        },
+        {
+          id: "3ac68c605-48d3-a4f8-fbd91aa97",
+          title: "Initial D",
+          description: "Epic 90's JDM manga",
+          image_url: "https://imgur.com/YnVIvcc.jpg",
+        },
+        {
+          id: "3ac68afc-c605-48d3-a4f8-fbd997",
+          title: "Initial D",
+          description: "Epic 90's JDM manga",
+          image_url: "https://imgur.com/YnVIvcc.jpg",
+        },
+        {
+          id: "3ac68afc-c605-48d3-afbd91aa97",
+          title: "Initial D",
+          description: "Epic 90's JDM manga",
+          image_url: "https://imgur.com/YnVIvcc.jpg",
+        },
+        {
+          id: "3ac68c6048d3-a4bd91aa97",
+          title: "Initial D",
+          description: "Epic 90's JDM manga",
+          image_url: "https://imgur.com/YnVIvcc.jpg",
+        },
+        {
+          id: "3ac68afc-c605-484f8-fbd997",
+          title: "Initial D",
+          description: "Epic 90's JDM manga",
+          image_url: "https://imgur.com/YnVIvcc.jpg",
+        },
+        {
+          id: "3ac68afc05-48d3-afbd91aa97",
+          title: "Initial D",
+          description: "Epic 90's JDM manga",
+          image_url: "https://imgur.com/YnVIvcc.jpg",
+        },
+      ]}
+    />
+  );
 };
+
+/*const App = () => {
+  return <Chapter onPublish={(e) => console.log(e)} />;
+};*/
 
 /*const App = () => {
   return (
     <Manga
       onSubscribe={() => console.log("subscribirse")}
+      editable={true}
       manga={{
         id: "3ac68afc-c605-48d3-a4f8-fbd91aa97",
         title: "Initial D",
@@ -51,6 +130,47 @@ const App = () => {
     />
   );
 };*/
+
+/*   manga={{
+        id: "3ac68afc-c605-48d3-a4f8-fbd91aa97",
+        title: "Initial D",
+        description: "Epic 90's JDM manga",
+        image_url: "https://imgur.com/YnVIvcc.jpg",
+        chapters: [
+          {
+            id: "3ac68afc-c605-48d3-a4f8-fbd91aa97",
+            title: "001 - Hachiroku",
+          },
+          {
+            id: "3ac68afc-c65-48d3-8-fbd91aa97",
+            title: "002 - Akina",
+          },
+          {
+            id: "3ac68ac-c6-48d3-f8-fbaa97",
+            title: "003 - Project D",
+          },
+          {
+            id: "3ac68afcc5-48d3-a-fbd91aa97",
+            title: "004 - Keisuke",
+          },
+          {
+            id: "3ac68ac-c6-8d3-f8-aa97",
+            title: "003 - Project D",
+          },
+          {
+            id: "3ac68afcc58d3-a-fbd91aa97",
+            title: "004 - Keisuke",
+          },
+          {
+            id: "3ac68ac-c6-48-f8-fbaa97",
+            title: "003 - Project D",
+          },
+          {
+            id: "3ac68af-48d3-a-fbd91aa97",
+            title: "004 - Keisuke",
+          },
+        ],
+      }} */
 
 /*const App = () => {
   return (
