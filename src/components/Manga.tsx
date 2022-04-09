@@ -4,6 +4,7 @@ import { Button, Dimensions, FlatList, Image, StyleSheet, Text, TextInput, Touch
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 
 import { aspectRatio } from '../utils/aspectRatio';
+import { MangaProps } from './interfaces/Manga';
 
 const screen = Dimensions.get("window");
 
@@ -52,7 +53,6 @@ const styles = StyleSheet.create({
   },
   chapterContainer: {
     width: "100%",
-    padding: 50,
     textAlign: "center",
     borderBottomColor: "blue",
     borderBottomWidth: 5,
@@ -61,39 +61,10 @@ const styles = StyleSheet.create({
   },
 });
 
-interface Chapter {
-  id: string;
-  title: string;
-}
-
-export interface MangaData {
-  id: string;
-  title: string;
-  description: string;
-  image_url: string;
-  chapters?: Chapter[];
-}
-
-interface MangaPublish {
-  title: string;
-  description: string;
-  image?: Asset;
-}
-
-interface MangaProps {
-  manga?: MangaData;
-  onSubscribe?: () => void;
-  onEdit?: (data: MangaPublish) => void;
-  onOpenChapter?: (id: string) => void;
-  onNewChapter?: () => void;
-  onPublish?: (data: MangaPublish) => void;
-  editable?: boolean;
-}
-
 export const Manga = (props: MangaProps) => {
-  const [title, setTitle] = useState<string>(props.manga?.title || "");
+  const [title, setTitle] = useState<string>(props.manga?.nombre || "");
   const [description, setDescription] = useState<string>(
-    props.manga?.description || ""
+    props.manga?.descripcion || ""
   );
 
   const [image, setImage] = useState<Asset>();
@@ -140,7 +111,7 @@ export const Manga = (props: MangaProps) => {
                 }}
               >
                 <Image
-                  source={{ uri: props.manga.image_url }}
+                  source={{ uri: props.manga.thumb }}
                   onLoad={(evt) => {
                     const ratio = aspectRatio(
                       evt.nativeEvent.source.width,
@@ -178,7 +149,7 @@ export const Manga = (props: MangaProps) => {
                     onPress={() => setOpenPicker(true)}
                   >
                     <Image
-                      source={{ uri: props.manga.image_url }}
+                      source={{ uri: props.manga.thumb }}
                       onLoad={(evt) => {
                         const ratio = aspectRatio(
                           evt.nativeEvent.source.width,
@@ -230,9 +201,9 @@ export const Manga = (props: MangaProps) => {
             >
               {props.manga && !props.editable && (
                 <>
-                  <Text style={styles.mangaTitle}>{props.manga.title}</Text>
+                  <Text style={styles.mangaTitle}>{props.manga.nombre}</Text>
                   <Text style={styles.mangaDescription}>
-                    {props.manga.description}
+                    {props.manga.descripcion}
                   </Text>
                 </>
               )}
@@ -289,9 +260,9 @@ export const Manga = (props: MangaProps) => {
                   onPress={() => {
                     if (props.onPublish) {
                       props.onPublish({
-                        image,
-                        title,
-                        description,
+                        thumb: image?.uri,
+                        descripcion: description,
+                        nombre: title,
                       });
                     }
                   }}
@@ -307,6 +278,29 @@ export const Manga = (props: MangaProps) => {
                 />
               </View>
             )}
+            {props.manga && !edited && props.editable && props.onDelete && (
+              <View style={styles.mangaAction}>
+                <Button title="Borrar" color="red" onPress={props.onDelete} />
+              </View>
+            )}
+
+            {props.editable && edited && (
+              <View style={styles.mangaAction}>
+                <Button
+                  title="Grabar"
+                  color="orange"
+                  onPress={() => {
+                    if (props.onEdit) {
+                      props.onEdit({
+                        nombre: title,
+                        thumb: image?.uri,
+                        descripcion: description,
+                      });
+                    }
+                  }}
+                />
+              </View>
+            )}
             {props.manga && props.onSubscribe && (
               <View style={styles.mangaAction}>
                 <Button
@@ -316,20 +310,12 @@ export const Manga = (props: MangaProps) => {
                 />
               </View>
             )}
-            {props.editable && edited && (
+            {props.manga && props.onDesubscribe && (
               <View style={styles.mangaAction}>
                 <Button
-                  title="Grabar"
+                  title="Desuscribirse"
                   color="red"
-                  onPress={() => {
-                    if (props.onEdit) {
-                      props.onEdit({
-                        image,
-                        title,
-                        description,
-                      });
-                    }
-                  }}
+                  onPress={props.onDesubscribe}
                 />
               </View>
             )}
@@ -337,20 +323,32 @@ export const Manga = (props: MangaProps) => {
         </View>
         {props.manga && (
           <FlatList
-            data={props.manga.chapters}
+            data={props.manga.capitulos}
             renderItem={({ item, index }) => (
-              <TouchableOpacity
-                style={styles.chapterContainer}
-                onPress={() => {
-                  if (props.onOpenChapter) props.onOpenChapter(item.id);
-                }}
-              >
-                <Text style={{ margin: 5 }}>
-                  {index + 1} - {item.title}
-                </Text>
-              </TouchableOpacity>
+              <View style={styles.chapterContainer}>
+                {props.editable && (
+                  <TouchableOpacity
+                    style={{ padding: 25 }}
+                    onPress={() => {
+                      if (props.onDeleteChapter) props.onDeleteChapter(item.id);
+                    }}
+                  >
+                    <MaterialIcon name="delete" color="blue" size={24} />
+                  </TouchableOpacity>
+                )}
+                <TouchableOpacity
+                  style={{ width: "100%", padding: 25 }}
+                  onPress={() => {
+                    if (props.onOpenChapter) props.onOpenChapter(item.id);
+                  }}
+                >
+                  <Text style={{ margin: 5 }}>
+                    {index + 1} - {item.nombre}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             )}
-            keyExtractor={(i) => i.id}
+            keyExtractor={(i) => i.id.toString()}
           />
         )}
       </View>

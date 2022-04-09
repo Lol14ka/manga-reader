@@ -1,18 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { FlatList, Image, Text, TextInput, View } from 'react-native';
+import { FlatList, Image, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-import { MangaData } from './Manga';
-
-interface ListProps {
-  data: MangaData[];
-  onSearch: (search: string) => void;
-}
+import { ListProps } from './interfaces/List';
 
 export const List = (props: ListProps) => {
   const [search, setSearch] = useState<string>();
 
   useEffect(() => {
-    props.onSearch(search || "");
+    if (search !== undefined) props.onSearch(search);
   }, [search]);
 
   return (
@@ -41,7 +36,7 @@ export const List = (props: ListProps) => {
         contentContainerStyle={{ alignItems: "center" }}
         data={props.data}
         renderItem={({ item }) => (
-          <View
+          <TouchableOpacity
             style={{
               backgroundColor: "white",
               padding: 5,
@@ -49,6 +44,10 @@ export const List = (props: ListProps) => {
               elevation: 1,
               shadowColor: "black",
               margin: 5,
+              width: 150,
+            }}
+            onPress={() => {
+              if (props.onSelect) props.onSelect(item.id);
             }}
           >
             <View
@@ -60,7 +59,7 @@ export const List = (props: ListProps) => {
               }}
             >
               <Image
-                source={{ uri: item.image_url }}
+                source={{ uri: item.thumb }}
                 style={{
                   width: "100%",
                   height: "100%",
@@ -70,16 +69,16 @@ export const List = (props: ListProps) => {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ fontSize: 16, fontWeight: "bold", margin: 5 }}>
-                {item.title}
+                {item.nombre}
               </Text>
               <Text style={{ fontSize: 10, margin: 5 }}>
-                {item.description}
+                {item.descripcion}
               </Text>
             </View>
-          </View>
+          </TouchableOpacity>
         )}
-        keyExtractor={(item) => item.id}
-        numColumns={3}
+        keyExtractor={(item) => item.id.toString()}
+        numColumns={2}
       />
     </View>
   );

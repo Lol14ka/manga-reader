@@ -7,9 +7,7 @@ import uuid from 'react-native-uuid';
 import AntIcon from 'react-native-vector-icons/AntDesign';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 
-interface ChapterProps {
-  onPublish: (title: string, images: Asset[]) => void;
-}
+import { ChapterProps } from './interfaces/Chapter';
 
 export const Chapter = (props: ChapterProps) => {
   const [title, setTitle] = useState<string>();

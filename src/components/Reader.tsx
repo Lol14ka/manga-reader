@@ -17,23 +17,7 @@ import FaIcon from 'react-native-vector-icons/FontAwesome';
 import IonIcon from 'react-native-vector-icons/Ionicons';
 
 import { aspectRatio, getRatioHeight } from '../utils/aspectRatio';
-
-interface ImageData {
-  id: string;
-  url: string;
-}
-
-interface PanelProps {
-  data: ImageData;
-  centered?: boolean;
-  onGetDimensions?: (dimensions: { width: number; height: number }) => void;
-  horizontal?: boolean;
-}
-
-interface ImageSize {
-  width: number;
-  height: number;
-}
+import { ImageData, ImageSize, PanelProps } from './interfaces/Reader';
 
 const screen = Dimensions.get("window");
 
@@ -134,7 +118,7 @@ export const Panel = (props: PanelProps) => {
   }
 };
 
-type Direction = "top" | "left" | "right" | "bottom";
+export type Direction = "top" | "left" | "right" | "bottom";
 
 interface Location {
   x: number;
@@ -152,7 +136,7 @@ interface ReaderData {
   direction: Direction;
 }
 
-interface ReaderStatus {
+export interface ReaderStatus {
   page: number;
   direction: Direction;
 }
