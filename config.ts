@@ -1,5 +1,5 @@
 export default {
-  server: "http://192.168.0.231:3000",
+  server: "https://manga-backend-reader.herokuapp.com",
   firebase: {
     apiKey: "AIzaSyCVhLbDHOsYEVRoQb5GStg0l4UG0E1RHPE",
     authDomain: "manga-react-reader.firebaseapp.com",

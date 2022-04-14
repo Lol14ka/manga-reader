@@ -28,6 +28,10 @@ export const SearchScreen = ({ navigation, route }: Props) => {
     useFunction("manga_traer");
 
   const [suscription, sendSuscription] = useFunction("suscripcion_traer");
+  const [onlySuscription, setOnlySuscription] = useState(
+    route.params?.only_subscription
+  );
+  const [onlyCreator, setOnlyCreator] = useState(route.params?.only_creator);
 
   const [input, setInput] = useState<string>();
   const [searchs, setSearchs] = useState<string[]>([]);
@@ -39,7 +43,8 @@ export const SearchScreen = ({ navigation, route }: Props) => {
   useNavigationFocus(() => {
     sendSuscription();
     sendPermissions();
-    sendManga();
+    sendSearch();
+    setIsNavOpen(false);
   });
 
   useNavigationFocus(async () => {
@@ -57,17 +62,21 @@ export const SearchScreen = ({ navigation, route }: Props) => {
     }
   }, [suscription.success]);
 
+  async function sendSearch() {
+    await sendManga({
+      data: {
+        busqueda: input,
+        solo_suscritos: onlySuscription,
+        solo_es_creador: onlyCreator,
+      },
+    });
+  }
+
   usePromise(async () => {
     if (input !== undefined) {
-      await sendManga({
-        data: {
-          busqueda: input,
-          solo_suscritos: route?.params?.only_subscription,
-          solo_es_creador: route?.params?.only_creator,
-        },
-      });
+      sendSearch();
     }
-  }, [input]);
+  }, [input, onlyCreator, onlySuscription]);
 
   function search(content: string) {
     setSearchs([...searchs, content]);
@@ -82,18 +91,33 @@ export const SearchScreen = ({ navigation, route }: Props) => {
 
   return (
     <>
-      {error && (
-        <ModalError error={error} onGoBack={() => navigation.push("search")} />
-      )}
+      {error && <ModalError error={error} onGoBack={() => linkTo("/login")} />}
       {isLoading && <ModalLoading />}
       {response && (
         <>
           <View
-            style={{ padding: 20, paddingTop: 40, backgroundColor: "#eeeee4" }}
+            style={{
+              padding: 20,
+              paddingTop: 40,
+              backgroundColor: "#eeeee4",
+              flexDirection: "row",
+            }}
           >
-            <TouchableOpacity onPress={() => setIsNavOpen(true)}>
+            <TouchableOpacity
+              style={{ width: "20%" }}
+              onPress={() => setIsNavOpen(true)}
+            >
               <AntIcon name="menufold" size={24} color="black" />
             </TouchableOpacity>
+            <View style={{ width: "60%", alignItems: "center" }}>
+              {onlySuscription && (
+                <Text style={{ fontSize: 16 }}>Tus Suscripciones</Text>
+              )}
+              {onlyCreator && <Text style={{ fontSize: 16 }}>Tus Mangas</Text>}
+              {!onlyCreator && !onlySuscription && (
+                <Text style={{ fontSize: 16 }}>Buscar Mangas</Text>
+              )}
+            </View>
           </View>
           <List
             onSearch={search}
@@ -144,7 +168,10 @@ export const SearchScreen = ({ navigation, route }: Props) => {
                   <TouchableOpacity
                     style={{ padding: 10 }}
                     onPress={() => {
-                      navigation.push("search", { only_creator: true });
+                      setOnlyCreator(true);
+                      setOnlySuscription(false);
+                      setInput("");
+                      setIsNavOpen(false);
                     }}
                   >
                     <View
@@ -167,7 +194,10 @@ export const SearchScreen = ({ navigation, route }: Props) => {
                   <TouchableOpacity
                     style={{ padding: 10 }}
                     onPress={() => {
-                      navigation.push("search", { only_subscription: true });
+                      setOnlySuscription(true);
+                      setOnlyCreator(false);
+                      setInput("");
+                      setIsNavOpen(false);
                     }}
                   >
                     <View
@@ -189,7 +219,10 @@ export const SearchScreen = ({ navigation, route }: Props) => {
                 <TouchableOpacity
                   style={{ padding: 10 }}
                   onPress={() => {
-                    navigation.push("search");
+                    setOnlyCreator(false);
+                    setOnlySuscription(false);
+                    setInput("");
+                    setIsNavOpen(false);
                   }}
                 >
                   <View
